@@ -81,59 +81,7 @@ def call_gemini_api(payload):
             return f"Error interno al procesar la respuesta de IA: {e}"
 
     return "Error al contactar con el modelo de IA después de múltiples intentos."
-    """
-    Llama a la API de Gemini con reintento (backoff exponencial).
-    Devuelve el texto generado o un mensaje de error legible.
-    """
 
-    # Leer SIEMPRE la API key del entorno en el momento de la llamada
-    api_key = os.environ.get("GEMINI_API_KEY")
-    print(">>> API KEY dentro de call_gemini_api:", api_key)
-
-    if not api_key:
-        return "Error: No se encontró la API KEY de Gemini. Configura la variable de entorno GEMINI_API_KEY."
-
-    # Construimos la URL usando esta api_key local
-    api_url = (
-        f"https://generativelanguage.googleapis.com/v1beta/models/"
-        f"{MODEL_NAME}:generateContent?key={api_key}"
-    )
-
-    max_retries = 5
-    retry_delay = 1  # segundos
-
-    for attempt in range(max_retries):
-        try:
-            headers = {"Content-Type": "application/json"}
-            response = requests.post(api_url, json=payload, headers=headers)
-            response.raise_for_status()
-
-            result = response.json()
-            candidate = result.get("candidates", [{}])[0]
-
-            if candidate and candidate.get("content") and candidate["content"].get("parts"):
-                text = candidate["content"]["parts"][0].get("text")
-                if text:
-                    return text
-                else:
-                    return (
-                        "El modelo de IA devolvió una respuesta vacía "
-                        "o fue bloqueada por políticas de seguridad."
-                    )
-
-            return f"Error de respuesta del modelo: {result.get('error', 'Estructura inesperada')}"
-
-        except requests.exceptions.RequestException as e:
-            if attempt < max_retries - 1:
-                time.sleep(retry_delay * (2 ** attempt))
-            else:
-                print(f"Error llamando a Gemini API: {e}")
-                return f"Error de conexión con la API de Gemini: {e}"
-        except Exception as e:
-            print(f"Error procesando la respuesta de Gemini: {e}")
-            return f"Error interno al procesar la respuesta de IA: {e}"
-
-    return "Error al contactar con el modelo de IA después de múltiples intentos."
 # ----------------------------------------
 # RUTA PRINCIPAL: FORMULARIO
 
@@ -236,8 +184,9 @@ def analisis_ia():
         imagenes_base64 = data.get("imagenes_base64", [])
 
         # -------------------------------
-        # 1. Datos base del evento
+        # 1. Datos base del evento (Se extraen igual)
         # -------------------------------
+        # ... (código de extracción de datos)
         nombre_evento = resultados.get("nombre_evento", "N/A")
         fecha_evento = resultados.get("fecha_evento", "N/A")
         nombre_empresa = resultados.get("nombre_empresa", "N/A")
@@ -268,44 +217,29 @@ def analisis_ia():
         )
 
         # -------------------------------
-        # 2. Prompt de sistema
+        # 2. Prompt de sistema (OPTIMIZADO)
         # -------------------------------
         system_prompt = (
-            "Eres un consultor experto en producción de eventos corporativos en Colombia, "
-            "especializado en diseño escénico, audio, video e iluminación.\n\n"
-            "Debes analizar el diseño técnico que se te entrega y responder en ESPAÑOL con el siguiente formato:\n\n"
-            "1. Diagnóstico del espacio y disposición (dimensiones, tarima, pasillos, distancia de la primera fila, etc.).\n"
-            "2. Pantallas y visibilidad (principal, auxiliares 16:9, lágrimas 9:16, pantallas 1:1; tamaños, pitch, pixel map, módulos LED y visibilidad).\n"
-            "3. Sonido e iluminación (tipo de sistema recomendado, cobertura, riesgos y sugerencias).\n"
-            "4. Recomendaciones para la experiencia del asistente (flujo de público, confort, legibilidad, recomendaciones extra).\n\n"
-            "Al final agrega una sección titulada 'Lista de Requerimientos Técnicos' "
-            "con una lista numerada (1., 2., 3., ...) que incluya todos los elementos técnicos clave: "
-            "pantallas, estructura, audio, iluminación, control, microfonía, distancias y alturas relevantes."
+            "Eres un consultor experto en producción de eventos corporativos en Colombia. "
+            "Analiza el diseño técnico que se te entrega y responde en ESPAÑOL con el siguiente formato, "
+            "siendo lo más conciso posible para garantizar una respuesta rápida:\n\n"
+            "1. Resumen de Dimensiones y Visibilidad (evalúa si el tamaño de la pantalla es adecuado para el salón).\n"
+            "2. 3 Puntos Clave: Identifica 3 puntos críticos o riesgos del diseño (e.g., poca capacidad de sillas, pitch inadecuado, techo bajo).\n"
+            "3. Lista de Requerimientos (solo la lista numerada de la técnica sugerida)."
         )
 
         # -------------------------------
-        # 3. Texto con los datos del diseño
+        # 3. Texto con los datos del diseño (SIMPLIFICADO)
         # -------------------------------
         query_text = (
-            f"Analiza el siguiente diseño técnico de evento en Colombia para el evento '{nombre_evento}' ({fecha_evento}) "
-            f"de la empresa '{nombre_empresa}'.\n\n"
-            f"Dimensiones del salón: {largo_salon}m (Largo) x {ancho_salon}m (Ancho) x {alto_salon}m (Alto).\n"
-            f"Asistentes previstos: {num_asistentes}.\n\n"
-            f"Pantalla principal: {pantalla.get('ancho_pantalla_w', 'N/A')}m de ancho x "
-            f"{pantalla.get('altura_pantalla_h', 'N/A')}m de alto "
-            f"({pantalla.get('relacion', 'N/A')}), pitch {pantalla.get('pitch_mm', 'N/A')}mm, "
-            f"pixel map {pantalla.get('pixel_map', 'N/A')}, módulos LED totales "
-            f"{pantalla.get('modulos_totales', 'N/A')}.\n\n"
-            f"Pantallas adicionales: {texto_pantallas_extra}.\n\n"
-            f"Tarima: {tarima.get('ancho_final', 'N/A')}m de ancho x {tarima.get('largo_final', 'N/A')}m de fondo, "
-            f"altura sugerida {tarima.get('altura_sugerida', 'N/A')}m.\n"
-            f"Silletería: capacidad calculada {sillas.get('capacidad_calculada', 'N/A')} asistentes, "
-            f"distancia primera fila a la tarima {sillas.get('distancia_primera_fila_tarima_m', 'N/A')}m, "
-            f"pasillos laterales de {sillas.get('ancho_pasillos_laterales', 'N/A')}m y pasillo central de "
-            f"{sillas.get('ancho_pasillo_central', 'N/A')}m.\n\n"
-            f"Técnica sugerida (estructura, sonido, iluminación, control y microfonía): {tecnica}.\n\n"
-            "Ten en cuenta las fotos del espacio (si se proporcionan) para ajustar el análisis contextual "
-            "y la recomendación de truss/stacking."
+            f"Analiza el siguiente diseño técnico (requiere concisión).\n\n"
+            f"EVENTO: '{nombre_evento}' de '{nombre_empresa}' el '{fecha_evento}'.\n"
+            f"SALÓN: {largo_salon}m (Largo) x {ancho_salon}m (Ancho) x {alto_salon}m (Alto). Asistentes: {num_asistentes}.\n\n"
+            f"PANTALLA PRINCIPAL: {pantalla.get('ancho_pantalla_w', 'N/A')}m x {pantalla.get('altura_pantalla_h', 'N/A')}m ({pantalla.get('relacion', 'N/A')}). Pitch: {pantalla.get('pitch_mm', 'N/A')}mm. Módulos totales: {pantalla.get('modulos_totales', 'N/A')}.\n"
+            f"TARIMA: {tarima.get('ancho_final', 'N/A')}m x {tarima.get('largo_final', 'N/A')}m. Altura: {tarima.get('altura_sugerida', 'N/A')}m.\n"
+            f"SILLETERÍA: Capacidad {sillas.get('capacidad_calculada', 'N/A')}. Dist. Primera Fila: {sillas.get('distancia_primera_fila_tarima', 'N/A')}m.\n"
+            f"TÉCNICA SUGERIDA: {tecnica}."
+            # Eliminamos el detalle de pantallas adicionales ya que suma mucho texto
         )
 
         # -------------------------------
@@ -316,6 +250,7 @@ def analisis_ia():
 
         # Añadimos imágenes si vienen desde el frontend
         if imagenes_base64:
+            # Lógica para añadir imágenes omitida por concisión, se mantiene igual
             image_parts = []
             for img_data in imagenes_base64:
                 if img_data.startswith("data:image/png"):
