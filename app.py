@@ -17,8 +17,8 @@ app = Flask(__name__)
 # Buscamos la API KEY en una variable de entorno llamada GEMINI_API_KEY.
 # NUNCA pongas la clave directamente en este archivo.
 # En PowerShell (con el venv activo) puedes hacer, por ejemplo:
-API_KEY = "AIzaSyC3aJEqS-uS24bt0KcvNzrR4KnpB_9XwHw"
-#API_KEY = os.environ.get("GEMINI_API_KEY")
+
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
 MODEL_NAME = "gemini-2.5-flash"
 API_URL = (
