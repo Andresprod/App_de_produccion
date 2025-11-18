@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Técnico de Eventos</title>
+
+    <!-- TailwindCSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            background-color: #f7f9fc;
+            font-family: 'Inter', sans-serif;
+        }
+        canvas {
+            border: 2px solid #1d4ed8;
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+<div class="max-w-6xl mx-auto bg-white p-8 shadow-xl rounded-2xl">
+
+    <!-- HEADER -->
+    <div class="flex flex-col items-center mb-6">
+        <div class="flex items-center gap-2">
+            <span class="text-3xl">🏢</span>
+            <h1 class="text-3xl font-extrabold text-yellow-500">
+                <span id="tituloEmpresa">[NOMBRE DE TU EMPRESA]</span>
+            </h1>
+        </div>
+        <p class="text-center text-gray-600 mt-2">
+            Introduce los parámetros del evento para generar el informe técnico completo.
+        </p>
+    </div>
+
+    <!-- FORMULARIO -->
+    <form id="eventForm" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- LADO IZQUIERDO -->
+        <div>
+            <h2 class="text-xl font-semibold border-l-4 border-yellow-500 pl-2 mb-3">
+                Información del Proyecto
+            </h2>
+
+            <label class="block text-sm font-medium">Nombre de tu Empresa</label>
+            <input id="nombre_empresa" name="nombre_empresa"
+                   class="w-full p-3 rounded-lg border mt-1"
+                   value="Técnica Profesional">
+
+            <label class="block text-sm font-medium mt-4">Fecha del Evento</label>
+            <input type="date" id="fecha_evento" name="fecha_evento"
+                   class="w-full p-3 rounded-lg border mt-1">
+
+            <label class="block text-sm font-medium mt-4">Nombre del Evento</label>
+            <input id="nombre_evento" name="nombre_evento"
+                   class="w-full p-3 rounded-lg border mt-1"
+                   value="Conferencia Anual 2026">
+
+            <label class="block text-sm font-medium mt-4">Nombre del Salón / Cliente</label>
+            <input id="nombre_escenario" name="nombre_escenario"
+                   class="w-full p-3 rounded-lg border mt-1"
+                   value="Salón Principal A">
+
+            <h2 class="text-xl font-semibold border-l-4 border-yellow-500 pl-2 mt-8 mb-3">
+                Dimensiones (metros)
+            </h2>
+
+            <label class="block text-sm font-medium">Largo del Salón (Profundidad)</label>
+            <input id="largo_salon" name="largo_salon" type="number" step="0.1"
+                   class="w-full p-3 rounded-lg border mt-1" value="15">
+
+            <label class="block text-sm font-medium mt-4">Ancho del Salón (Frente)</label>
+            <input id="ancho_salon" name="ancho_salon" type="number" step="0.1"
+                   class="w-full p-3 rounded-lg border mt-1" value="10">
+
+            <label class="block text-sm font-medium mt-4">Altura del Salón</label>
+            <input id="alto_salon" name="alto_salon" type="number" step="0.1"
+                   class="w-full p-3 rounded-lg border mt-1" value="5">
+
+            <label class="block text-sm font-medium mt-4">Número de Asistentes</label>
+            <input id="num_asistentes" name="num_asistentes" type="number"
+                   class="w-full p-3 rounded-lg border mt-1" value="120">
+        </div>
+
+        <!-- LADO DERECHO -->
+        <div>
+            <h2 class="text-xl font-semibold border-l-4 border-yellow-500 pl-2 mb-3">
+                Configuración del Escenario
+            </h2>
+
+            <label class="block text-sm font-medium">Relación de Aspecto de la Pantalla Principal</label>
+            <select id="relacion_aspecto" name="relacion_aspecto"
+                    class="w-full p-3 rounded-lg border mt-1">
+                <option value="16:9">16:9 Horizontal</option>
+                <option value="9:16">9:16 Vertical</option>
+                <option value="1:1">1:1 Cuadrada</option>
+            </select>
+
+            <h3 class="text-md font-semibold mt-6 mb-2">
+                Pantallas adicionales (opcionales, máx 5 de cada tipo)
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-medium">Auxiliares 16:9</label>
+                    <input id="pantallas_aux_16_9" name="pantallas_aux_16_9" type="number"
+                           min="0" max="5" value="2"
+                           class="w-full p-2 rounded-lg border mt-1 text-center">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium">Lágrimas 9:16</label>
+                    <input id="pantallas_lagrimas_9_16" name="pantallas_lagrimas_9_16" type="number"
+                           min="0" max="5" value="0"
+                           class="w-full p-2 rounded-lg border mt-1 text-center">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium">Pantallas 1:1</label>
+                    <input id="pantallas_cuadradas_1_1" name="pantallas_cuadradas_1_1" type="number"
+                           min="0" max="5" value="0"
+                           class="w-full p-2 rounded-lg border mt-1 text-center">
+                </div>
+            </div>
+
+            <label class="block text-sm font-medium mt-4">Observaciones Técnicas (Opcional)</label>
+            <textarea id="observaciones" name="observaciones"
+                      class="w-full p-3 rounded-lg border mt-1 h-24"
+                      placeholder="Ej: El cliente solicita tarima negra, sonido premium, cámara fija…"></textarea>
+
+            <h2 class="text-xl font-semibold border-l-4 border-yellow-500 pl-2 mt-6 mb-3">
+                Fotos del Espacio (Opcional)
+            </h2>
+
+            <input type="file" id="imageInput" accept="image/*"
+                   class="w-full p-3 rounded-lg border mt-1">
+            <p class="text-sm text-gray-500 mt-1">
+                Puedes subir una imagen del salón para contextualizar el diseño.
+            </p>
+
+            <div class="mt-4">
+                <p class="text-sm font-semibold text-gray-700 mb-1">Plano cenital (vista desde arriba)</p>
+                <canvas id="stageCanvasTop" width="700" height="320"
+                        class="w-full rounded-lg"></canvas>
+            </div>
+
+            <div class="mt-4">
+                <p class="text-sm font-semibold text-gray-700 mb-1">Vista frontal</p>
+                <canvas id="stageCanvasFront" width="700" height="260"
+                        class="w-full rounded-lg"></canvas>
+            </div>
+
+        </div>
+    </form>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="flex flex-wrap gap-4 justify-center mt-8">
+
+        <button id="btnCalcular"
+                class="px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700">
+            🔍 Calcular Diseño
+        </button>
+
+        <button id="btnIA"
+                class="px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700">
+            🤖 Análisis con IA (Gemini)
+        </button>
+
+        <button id="btnPDF"
+                class="px-6 py-3 rounded-lg bg-yellow-500 text-white font-semibold hover:bg-yellow-600">
+            📄 Generar PDF
+        </button>
+
+    </div>
+
+    <!-- RESULTADOS -->
+    <div class="mt-8 p-6 bg-gray-50 rounded-xl shadow-inner">
+        <h2 class="text-xl font-semibold mb-2">Resultados de Cálculo</h2>
+        <pre id="resultadoBox" class="whitespace-pre-wrap text-xs md:text-sm"></pre>
+    </div>
+
+    <!-- ANÁLISIS IA -->
+    <div id="iaBox" class="mt-8 p-6 bg-purple-50 border border-purple-300 rounded-xl hidden">
+        <h2 class="text-xl font-semibold text-purple-700">Análisis de Inteligencia Artificial</h2>
+        <p id="iaTexto" class="mt-2 text-gray-800 text-sm md:text-base"></p>
+    </div>
+
+</div> <!-- fin contenedor principal -->
+
+<!-- JAVASCRIPT -->
+<script>
+let imagenesBase64 = [];
+let ultimoResultado = null;
+
+// Título dinámico con el nombre de la empresa
+const inputEmpresa = document.getElementById("nombre_empresa");
+const tituloEmpresa = document.getElementById("tituloEmpresa");
+function actualizarTituloEmpresa() {
+    tituloEmpresa.textContent = inputEmpresa.value || "[NOMBRE DE TU EMPRESA]";
+}
+inputEmpresa.addEventListener("input", actualizarTituloEmpresa);
+actualizarTituloEmpresa();
+
+// CANVAS
+const canvasTop = document.getElementById("stageCanvasTop");
+const ctxTop = canvasTop.getContext("2d");
+const canvasFront = document.getElementById("stageCanvasFront");
+const ctxFront = canvasFront.getContext("2d");
+
+function limpiarCanvas(ctx, canvas) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#f3f4f6";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+// Imagen opcional subida
+document.getElementById("imageInput").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        imagenesBase64 = [reader.result];
+
+        const img = new Image();
+        img.onload = () => {
+            limpiarCanvas(ctxTop, canvasTop);
+            const scale = Math.min(canvasTop.width / img.width, canvasTop.height / img.height);
+            const w = img.width * scale;
+            const h = img.height * scale;
+            const x = (canvasTop.width - w) / 2;
+            const y = (canvasTop.height - h) / 2;
+            ctxTop.drawImage(img, x, y, w, h);
+        };
+        img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+// Dibujo del plano cenital
+function dibujarPlanoCenital(datos) {
+    if (!datos) return;
+    limpiarCanvas(ctxTop, canvasTop);
+
+    const ancho = Number(datos.ancho_salon);
+    const largo = Number(datos.largo_salon);
+    const tarima = datos.tarima || {};
+    const sillas = datos.sillas || {};
+    const pantalla = datos.pantalla || datos.pantalla_principal || {};
+
+    const margen = 40;
+    const usableW = canvasTop.width - margen * 2;
+    const usableH = canvasTop.height - margen * 2;
+    const escala = Math.min(usableW / ancho, usableH / largo);
+
+    const wSala = ancho * escala;
+    const hSala = largo * escala;
+    const xSala = (canvasTop.width - wSala) / 2;
+    const ySala = (canvasTop.height - hSala) / 2;
+
+    // Salón
+    ctxTop.strokeStyle = "#1d4ed8";
+    ctxTop.lineWidth = 2;
+    ctxTop.strokeRect(xSala, ySala, wSala, hSala);
+
+    ctxTop.fillStyle = "#1f2937";
+    ctxTop.font = "12px Arial";
+    ctxTop.fillText(`Salón: ${ancho}m x ${largo}m`, xSala + 4, ySala + 14);
+    ctxTop.fillText(`${ancho} m`, xSala + wSala / 2 - 20, ySala + hSala + 16);
+    ctxTop.save();
+    ctxTop.translate(xSala - 18, ySala + hSala / 2);
+    ctxTop.rotate(-Math.PI / 2);
+    ctxTop.fillText(`${largo} m`, 0, 0);
+    ctxTop.restore();
+
+    // Tarima
+    const wTar = (tarima.ancho_final || 0) * escala;
+    const hTar = (tarima.largo_final || 0) * escala;
+    const xTar = xSala + (wSala - wTar) / 2;
+    const yTar = ySala + 8;
+
+    ctxTop.fillStyle = "#16a34a";
+    ctxTop.fillRect(xTar, yTar, wTar, hTar);
+    ctxTop.fillStyle = "white";
+    ctxTop.font = "11px Arial";
+    ctxTop.fillText(
+        `Tarima: ${tarima.ancho_final || 0}m x ${tarima.largo_final || 0}m`,
+        xTar + 4,
+        yTar + 14
+    );
+
+    // Área de sillas
+    const distanciaFila = sillas.distancia_primera_fila_tarima_m || 2;
+    const hGap = distanciaFila * escala;
+    const ySillas = yTar + hTar + hGap;
+    const hSillas = hSala - (ySillas - ySala);
+
+    ctxTop.fillStyle = "#9ca3af";
+    ctxTop.fillRect(xSala, ySillas, wSala, hSillas);
+
+    ctxTop.fillStyle = "#111827";
+    ctxTop.fillText(
+        `Silletería (Capacidad aprox.: ${sillas.capacidad_calculada || 0})`,
+        xSala + 6,
+        ySillas + 18
+    );
+
+    // Pasillos laterales y central (solo se marcan)
+    const pasilloLat = (sillas.ancho_pasillos_laterales || 1) * escala;
+    const pasilloCentral = (sillas.ancho_pasillo_central || 1) * escala;
+
+    ctxTop.fillStyle = "#e5e7eb";
+    // izquierda
+    ctxTop.fillRect(xSala, ySillas, pasilloLat, hSillas);
+    // derecha
+    ctxTop.fillRect(xSala + wSala - pasilloLat, ySillas, pasilloLat, hSillas);
+    // central
+    ctxTop.fillRect(
+        xSala + (wSala - pasilloCentral) / 2,
+        ySillas,
+        pasilloCentral,
+        hSillas
+    );
+
+    // Pantalla principal (encima de la tarima)
+    const wPant = (pantalla.ancho_pantalla_w || 0) * escala;
+    const hPant = (pantalla.altura_pantalla_h || 0) * escala;
+    const xPant = xSala + (wSala - wPant) / 2;
+    const yPant = ySala - hPant + 5;
+
+    ctxTop.fillStyle = "#1d4ed8";
+    ctxTop.fillRect(xPant, yPant, wPant, hPant);
+    ctxTop.fillStyle = "white";
+    ctxTop.font = "11px Arial";
+    ctxTop.fillText(
+        `Pantalla principal ${pantalla.ancho_pantalla_w || 0}m x ${pantalla.altura_pantalla_h || 0}m`,
+        xPant + 4,
+        yPant + 14
+    );
+
+    // Pantallas adicionales (solo iconos laterales)
+    const extras = datos.pantallas_adicionales || [];
+    extras.forEach((p, idx) => {
+        const esLagrima = p.tipo.includes("Lágrima");
+        const esAux = p.tipo.includes("Auxiliar");
+        const scaleExtra = escala * 0.9;
+
+        let w = p.ancho_m * scaleExtra;
+        let h = p.alto_m * scaleExtra;
+
+        let x, y;
+        if (esAux) {
+            // a los lados de la principal
+            y = yPant + hPant / 2 - h / 2;
+            x = idx % 2 === 0 ? xPant - w - 10 : xPant + wPant + 10;
+        } else if (esLagrima) {
+            // lágrimas algo adelantadas
+            y = yTar + hTar + hGap / 2 - h / 2;
+            x = idx % 2 === 0 ? xSala + 10 : xSala + wSala - w - 10;
+        } else {
+            // 1:1 cerca del centro
+            y = ySillas + hSillas - h - 10;
+            x = xSala + wSala / 2 - w / 2;
+        }
+
+        ctxTop.fillStyle = esLagrima ? "#22c55e" : "#0ea5e9";
+        ctxTop.fillRect(x, y, w, h);
+    });
+}
+
+// Dibujo de vista frontal
+function dibujarVistaFrontal(datos) {
+    if (!datos) return;
+    limpiarCanvas(ctxFront, canvasFront);
+
+    const altoSalon = Number(datos.alto_salon);
+    const tarima = datos.tarima || {};
+    const pantalla = datos.pantalla || datos.pantalla_principal || {};
+    const extras = datos.pantallas_adicionales || [];
+
+    const margen = 40;
+    const usableH = canvasFront.height - margen * 2;
+    const escala = usableH / altoSalon;
+
+    const pisoY = canvasFront.height - margen;
+
+    // Lado izquierdo como "pared" para la altura del salón
+    ctxFront.strokeStyle = "#1d4ed8";
+    ctxFront.lineWidth = 2;
+    ctxFront.beginPath();
+    ctxFront.moveTo(margen, pisoY - altoSalon * escala);
+    ctxFront.lineTo(margen, pisoY);
+    ctxFront.stroke();
+
+    ctxFront.fillStyle = "#111827";
+    ctxFront.font = "12px Arial";
+    ctxFront.save();
+    ctxFront.translate(margen - 18, pisoY - (altoSalon * escala) / 2);
+    ctxFront.rotate(-Math.PI / 2);
+    ctxFront.fillText(`Altura salón: ${altoSalon}m`, 0, 0);
+    ctxFront.restore();
+
+    // Línea de piso
+    ctxFront.beginPath();
+    ctxFront.moveTo(margen, pisoY);
+    ctxFront.lineTo(canvasFront.width - margen, pisoY);
+    ctxFront.stroke();
+
+    // Tarima
+    const altTar = (tarima.altura_sugerida || 0.6) * escala;
+    const anchoTar = (tarima.ancho_final || 0) * escala * 0.6;
+    const xTar = canvasFront.width / 2 - anchoTar / 2;
+    const yTar = pisoY - altTar;
+
+    ctxFront.fillStyle = "#6b7280";
+    ctxFront.fillRect(xTar, yTar, anchoTar, altTar);
+    ctxFront.fillStyle = "white";
+    ctxFront.font = "11px Arial";
+    ctxFront.fillText(`Tarima ${tarima.altura_sugerida || 0.6}m`, xTar + 4, yTar + 14);
+
+    // Pantalla principal
+    const altPant = (pantalla.altura_pantalla_h || 0) * escala;
+    const anchoPant = (pantalla.ancho_pantalla_w || 0) * escala * 0.6;
+    const yPantBase = yTar - (pantalla.altura_base_pantalla_bos || 1) * escala;
+    const yPant = yPantBase - altPant;
+    const xPant = canvasFront.width / 2 - anchoPant / 2;
+
+    ctxFront.fillStyle = "#1d4ed8";
+    ctxFront.fillRect(xPant, yPant, anchoPant, altPant);
+    ctxFront.fillStyle = "white";
+    ctxFront.fillText(
+        `${pantalla.ancho_pantalla_w || 0}m x ${pantalla.altura_pantalla_h || 0}m`,
+        xPant + 4,
+        yPant + 14
+    );
+
+    // Pantallas adicionales (frontal)
+    extras.forEach((p, idx) => {
+        const esLagrima = p.tipo.includes("Lágrima");
+        const esAux = p.tipo.includes("Auxiliar");
+
+        const alt = p.alto_m * escala;
+        const an = p.ancho_m * escala * 0.6;
+        let x, y;
+
+        if (esAux) {
+            y = yPant + altPant / 2 - alt / 2;
+            x = idx % 2 === 0 ? xPant - an - 10 : xPant + anchoPant + 10;
+        } else if (esLagrima) {
+            y = yTar - alt + 10;
+            x = idx % 2 === 0 ? xTar - an - 20 : xTar + anchoTar + 20;
+        } else {
+            y = yTar - alt - 10;
+            x = canvasFront.width / 2 - an / 2;
+        }
+
+        ctxFront.fillStyle = esLagrima ? "#22c55e" : "#0ea5e9";
+        ctxFront.fillRect(x, y, an, alt);
+    });
+}
+
+// BOTÓN: CALCULAR DISEÑO
+document.getElementById("btnCalcular").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const form = document.getElementById("eventForm");
+    const formData = new FormData(form);
+
+    const resp = await fetch("/calcular", {
+        method: "POST",
+        body: formData
+    });
+
+    const data = await resp.json();
+
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    ultimoResultado = data;
+    document.getElementById("resultadoBox").textContent =
+        JSON.stringify(data, null, 2);
+
+    dibujarPlanoCenital(data);
+    dibujarVistaFrontal(data);
+});
+
+// BOTÓN: ANÁLISIS IA
+document.getElementById("btnIA").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (!ultimoResultado) {
+        alert("Primero haz clic en 'Calcular Diseño'.");
+        return;
+    }
+
+    const resp = await fetch("/analisis_ia", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            resultados: ultimoResultado,
+            imagenes_base64: imagenesBase64
+        })
+    });
+
+    const data = await resp.json();
+
+    if (data.error) {
+        document.getElementById("iaTexto").textContent = data.error;
+    } else {
+        document.getElementById("iaTexto").innerHTML = data.analisis_ia;
+    }
+
+    document.getElementById("iaBox").classList.remove("hidden");
+});
+
+// BOTÓN: GENERAR PDF
+document.getElementById("btnPDF").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    if (!ultimoResultado) {
+        alert("Primero debes calcular el diseño.");
+        return;
+    }
+
+    const analisisIA = document.getElementById("iaTexto").innerHTML || "Sin análisis IA.";
+
+    const imagenPlanoCenital = canvasTop.toDataURL("image/png");
+    const imagenPlanoFrontal = canvasFront.toDataURL("image/png");
+
+    const resp = await fetch("/generar_pdf", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            resultados: ultimoResultado,
+            imagen_cenital_base64: imagenPlanoCenital,
+            imagen_frontal_base64: imagenPlanoFrontal,
+            analisis_ia: analisisIA
+        })
+    });
+
+    const blob = await resp.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Informe_Evento_Tecnico.pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+});
+</script>
+
+</body>
+</html>
